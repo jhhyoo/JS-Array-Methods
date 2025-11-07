@@ -26,6 +26,7 @@
             color: #e0e0e0;
             font-size: 1.5rem;
             margin-bottom: 0.5rem;
+            user-select: none;
         }
         #arrayDisplay {
             font-family: 'Noto Sans JP', sans-serif;
@@ -34,7 +35,7 @@
             color: #667eea;
             background: #1a1a1a;
             min-width: 280px;
-            max-width: 600px;
+            max-width: 700px;
             padding: 1rem 1.5rem;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
@@ -57,6 +58,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             /* min-width: 300px; */
             flex-wrap: nowrap;
+            user-select: none;
         }
         .section-title {
             font-size: 0.85rem;
@@ -180,9 +182,9 @@
         <div class="column">
             <input type="text" id="itemInput" placeholder="要素を入力">
             <div class="row">
-                <button class="quick-btn" data-value="ざくろ">ざくろ</button>
-                <button class="quick-btn" data-value="キウイ">キウイ</button>
-                <button class="quick-btn" data-value="レモン">レモン</button>
+                <button data-value="ざくろ">ざくろ</button>
+                <button data-value="キウイ">キウイ</button>
+                <button data-value="レモン">レモン</button>
             </div>
         </div>
     </div>
@@ -256,8 +258,9 @@
                         '"': '&quot;', "'": '&#39;'
                     }[c]));
                     const cls = i === highlightIndex ? highlightClass : "";
-                    return `<span class="${cls}">"${safe}"</span>`;
-                }).join("\u00A0, ") + "]";
+                    const comma = i < this.arr.length - 1 ? ",\u00A0" : "";
+                    return `<span class="${cls}">"${safe}"${comma}</span>`;
+                }).join("") + "]";
 
                 if (highlightClass === "highlight-add") {
                     setTimeout(() => {
