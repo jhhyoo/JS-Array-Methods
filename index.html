@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Array Methods</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem 1rem;
+            background: #2a2a2a;
+            min-height: 100vh;
+        }
+        h2 {
+            color: #e0e0e0;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        #arrayDisplay {
+            background: #1a1a1a;
+            color: #667eea; /* #00ff41; */
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            min-width: 280px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            font-family: 'Noto Sans JP', sans-serif;
+            transition: all 0.3s ease;
+        }
+        .section {
+            background: #3a3a3a;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            max-width: 480px;
+            flex-wrap: nowrap;
+        }
+        .section-title {
+            font-size: 0.85rem;
+            color: #aaa;
+            text-align: center;
+        }
+        .row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        input {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 0.95rem;
+            padding: 0.4rem;
+            border: 1px solid #555;
+            border-radius: 4px;
+            text-align: center;
+            transition: border-color 0.3s;
+            background: #2a2a2a;
+            color: #e0e0e0;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        input::placeholder {
+            text-align: center;
+            color: #666;
+        }
+        #itemInput {
+            flex: 1;
+        }
+        button {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 0.9rem;
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #4a4a4a;
+            color: #e0e0e0;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #5a5a5a;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .quick-btn:hover {
+            background: #4a4a4a;
+            color: #e0e0e0;
+        }
+        .method-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+        .method-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            align-items: center;
+        }
+        .method-label {
+            font-size: 0.85rem;
+            color: #999;
+        }
+        .highlight-add {
+            color: #ffd700 !important;
+            animation: pulse 0.5s;
+        }
+        .highlight-remove {
+            color: #ff6b6b !important;
+            animation: shake 0.5s;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .info-text {
+            font-size: 0.85rem;
+            color: #aaa;
+            min-height: 1.3rem;
+        }
+        label {
+            color: #aaa;
+            font-family: 'Consolas', monospace;
+        }
+    </style>
+</head>
+<body>
+    <h2>JS Array Methods</h2>
+    
+    <div id="arrayDisplay"></div>
+
+    <!-- Input Section -->
+    <div class="section">
+        <div class="column">
+            <input type="text" id="itemInput" placeholder="要素を入力">
+            <div class="row">
+                <button class="quick-btn" data-value="ざくろ">ざくろ</button>
+                <button class="quick-btn" data-value="キウイ">キウイ</button>
+                <button class="quick-btn" data-value="レモン">レモン</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Basic Methods -->
+    <div class="section">
+        <div class="method-group">
+            <div class="method-item">
+                <div class="method-label">→[●,　]</div>
+                <button data-method="unshift">.unshift()</button>
+            </div>
+            <div class="method-item">
+                <div class="method-label">[　,●]←</div>
+                <button data-method="push">.push()</button>
+            </div>
+            <div class="method-item">
+                <div class="method-label">←[○,　]</div>
+                <button data-method="shift">.shift()</button>
+            </div>
+            <div class="method-item">
+                <div class="method-label">[　,○]→</div>
+                <button data-method="pop">.pop()</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Splice Section -->
+    <div class="section">
+        <div class="column">
+            <div class="section-title">位置 a から b 個の要素を削除します</div>
+            <div class="row">
+                <label>.splice(</label>
+                <input type="number" id="spliceA" value="1" placeholder="a" style="width:40px">
+                <label>,</label>
+                <input type="number" id="spliceB" value="1" placeholder="b" style="width:40px">
+                <label>)</label>
+                <button data-method="splice">実行</button>
+            </div>
+            <div id="spliceInfo" class="info-text"></div>
+        </div>
+    </div>
+
+    <!-- Join Section -->
+    <div class="section">
+        <div class="column">
+            <div class="row">
+                <label>.join("</label>
+                <input type="text" id="joinInput" placeholder="区切り文字" style="width:100px">
+                <label>")</label>
+                <button data-method="join">実行</button>
+            </div>
+            <div class="row">
+                <button data-join="、">"、"</button>
+                <button data-join=" - ">" - "</button>
+                <button data-join=" | ">" | "</button>
+                <button data-join="　">"　"</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            arr: ["りんご", "みかん", "バナナ"],
+            
+            updateDisplay(highlightIndex = null, highlightClass = "") {
+                const display = document.getElementById("arrayDisplay");
+                
+                display.innerHTML = "[" + this.arr.map((item, i) => {
+                    const safe = String(item).replace(/[<>&"']/g, c => ({
+                        '<': '&lt;', '>': '&gt;', '&': '&amp;',
+                        '"': '&quot;', "'": '&#39;'
+                    }[c]));
+                    const cls = i === highlightIndex ? highlightClass : "";
+                    return `<span class="${cls}">"${safe}"</span>`;
+                }).join(", ") + "]";
+
+                if (highlightClass === "highlight-add") {
+                    setTimeout(() => {
+                        const span = display.querySelector(`.${highlightClass}`);
+                        span?.classList.remove(highlightClass);
+                    }, 500);
+                }
+            },
+
+            updateSpliceInfo() {
+                const start = parseInt(document.getElementById("spliceA").value, 10);
+                const count = parseInt(document.getElementById("spliceB").value, 10) || 1;
+                const info = document.getElementById("spliceInfo");
+
+                if (isNaN(start)) {
+                    info.textContent = "";
+                    return;
+                }
+
+                const removed = [...this.arr].splice(start, count);
+                info.textContent = removed.length > 0 
+                    ? `=　${removed.join("、")}`
+                    : "=（削除される要素なし）";
+            }
+        };
+
+        const methods = {
+            push() {
+                const val = document.getElementById("itemInput").value.trim();
+                if (!val) return state.updateDisplay();
+                
+                state.arr.push(val);
+                state.updateDisplay(state.arr.length - 1, "highlight-add");
+            },
+
+            unshift() {
+                const val = document.getElementById("itemInput").value.trim();
+                if (!val) return state.updateDisplay();
+                
+                state.arr.unshift(val);
+                state.updateDisplay(0, "highlight-add");
+            },
+
+            pop() {
+                if (state.arr.length === 0) return;
+                
+                state.updateDisplay(state.arr.length - 1, "highlight-remove");
+                setTimeout(() => {
+                    state.arr.pop();
+                    state.updateDisplay();
+                }, 500);
+            },
+
+            shift() {
+                if (state.arr.length === 0) return;
+                
+                state.updateDisplay(0, "highlight-remove");
+                setTimeout(() => {
+                    state.arr.shift();
+                    state.updateDisplay();
+                }, 500);
+            },
+
+            splice() {
+                const start = parseInt(document.getElementById("spliceA").value, 10);
+                const count = parseInt(document.getElementById("spliceB").value, 10) || 1;
+                
+                if (isNaN(start) || state.arr.length === 0) return;
+                
+                // Подсветка элементов перед удалением
+                const display = document.getElementById("arrayDisplay");
+                const spans = display.querySelectorAll("span");
+                
+                for (let i = start; i < start + count && i < state.arr.length; i++) {
+                    if (spans[i]) {
+                        spans[i].classList.add("highlight-remove");
+                    }
+                }
+                
+                setTimeout(() => {
+                    state.arr.splice(start, count);
+                    state.updateDisplay();
+                    state.updateSpliceInfo();
+                }, 500);
+            },
+
+            join() {
+                const sep = document.getElementById("joinInput").value;
+                document.getElementById("arrayDisplay").textContent = state.arr.join(sep);
+            }
+        };
+
+        // Event Delegation
+        document.addEventListener("click", (e) => {
+            const btn = e.target.closest("button");
+            if (!btn) return;
+
+            const method = btn.dataset.method;
+            const quickValue = btn.dataset.value;
+            const joinValue = btn.dataset.join;
+
+            if (method && methods[method]) {
+                methods[method]();
+            } else if (quickValue) {
+                document.getElementById("itemInput").value = quickValue;
+            } else if (joinValue !== undefined) {
+                document.getElementById("joinInput").value = joinValue;
+                methods.join();
+            }
+        });
+
+        // Input listeners
+        document.getElementById("spliceA").addEventListener("input", () => state.updateSpliceInfo());
+        document.getElementById("spliceB").addEventListener("input", () => state.updateSpliceInfo());
+
+        // Initialize
+        state.updateDisplay();
+        state.updateSpliceInfo();
+    </script>
+</body>
+</html>
