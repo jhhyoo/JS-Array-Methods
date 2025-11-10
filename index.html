@@ -39,7 +39,6 @@
             padding: 1rem 1.5rem;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
             position: sticky;
             top: 1rem;
             z-index: 10;
@@ -48,7 +47,7 @@
             overflow-wrap: anywhere;
         }
         #arrayDisplay span {
-            transition: all 0.3s ease;
+            transition: color 0.5s ease;
             display: inline-block;
 }
         .section {
@@ -138,11 +137,14 @@
         }
         .highlight-add {
             color: #ffd700 !important;
-            animation: pulse 0.5s, fadeIn 0.3s;
+            animation: pulse 0.4s, fadeIn 0.4s;
         }
         .highlight-remove {
             color: #ff6b6b !important;
             animation: shake 0.5s, fadeOut 0.3s 0.2s forwards;
+        }
+        .highlight-splice {
+            color: #00d9ff !important;
         }
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
@@ -248,25 +250,57 @@
     <script>
         const state = {
             arr: ["りんご", "みかん", "バナナ"],
+            spliceHighlight: [],
             
-            updateDisplay(highlightIndex = null, highlightClass = "") {
+            updateDisplay(highlightIndices = null, highlightClass = "") {
                 const display = document.getElementById("arrayDisplay");
                 
-                display.innerHTML = "[" + this.arr.map((item, i) => {
-                    const safe = String(item).replace(/[<>&"']/g, c => ({
-                        '<': '&lt;', '>': '&gt;', '&': '&amp;',
-                        '"': '&quot;', "'": '&#39;'
-                    }[c]));
-                    const cls = i === highlightIndex ? highlightClass : "";
-                    const comma = i < this.arr.length - 1 ? ",\u00A0" : "";
-                    return `<span class="${cls}">"${safe}"${comma}</span>`;
-                }).join("") + "]";
+                const indices = highlightIndices === null 
+                    ? this.spliceHighlight 
+                    : (Array.isArray(highlightIndices) ? highlightIndices : [highlightIndices]);
+                
+                // Сохраняем существующие span элементы
+                const existingSpans = Array.from(display.querySelectorAll('span'));
+                
+                // Если количество элементов изменилось - полный перерендер
+                if (existingSpans.length !== this.arr.length) {
+                    display.innerHTML = "[" + this.arr.map((item, i) => {
+                        const safe = String(item).replace(/[<>&"']/g, c => ({
+                            '<': '&lt;', '>': '&gt;', '&': '&amp;',
+                            '"': '&quot;', "'": '&#39;'
+                        }[c]));
+                        
+                        let cls = "";
+                        if (highlightClass && indices.includes(i)) {
+                            cls = highlightClass;
+                        } else if (this.spliceHighlight.includes(i)) {
+                            cls = "highlight-splice";
+                        }
+                        
+                        const comma = i < this.arr.length - 1 ? ",\u00A0" : "";
+                        return `<span class="${cls}">"${safe}"${comma}</span>`;
+                    }).join("") + "]";
+                } 
+                // Если количество то же - просто обновляем классы (transition сработает)
+                else {
+                    existingSpans.forEach((span, i) => {
+                        // Убираем все классы подсветки
+                        span.className = "";
+                        
+                        // Добавляем нужные классы
+                        if (highlightClass && indices.includes(i)) {
+                            span.className = highlightClass;
+                        } else if (this.spliceHighlight.includes(i)) {
+                            span.className = "highlight-splice";
+                        }
+                    });
+                }
 
                 if (highlightClass === "highlight-add") {
                     setTimeout(() => {
-                        const span = display.querySelector(`.${highlightClass}`);
-                        span?.classList.remove(highlightClass);
-                    }, 500);
+                        const spans = display.querySelectorAll(`.${highlightClass}`);
+                        spans.forEach(span => span.className = "");
+                    }, 400);
                 }
             },
 
@@ -274,13 +308,11 @@
                 const start = parseInt(document.getElementById("spliceA").value, 10);
                 const count = parseInt(document.getElementById("spliceB").value, 10);
                 const info = document.getElementById("spliceInfo");
-                if (isNaN(count)) {
+                
+                if (isNaN(count) || isNaN(start)) {
                     info.textContent = "";
-                    return;
-                }
-
-                if (isNaN(start)) {
-                    info.textContent = "";
+                    this.spliceHighlight = [];
+                    this.updateDisplay();
                     return;
                 }
 
@@ -288,24 +320,45 @@
                 info.textContent = removed.length > 0 
                     ? `=　${removed.join("、")}`
                     : "=（削除される要素なし）";
+                
+                // Сохраняем предыдущий диапазон перед обновлением
+                this.prevSpliceHighlight = [...this.spliceHighlight];
+                
+                // Вычисляем новый диапазон
+                this.spliceHighlight = [];
+                for (let i = start; i < start + count && i < this.arr.length; i++) {
+                    this.spliceHighlight.push(i);
+                }
+                
+                this.updateDisplay();
             }
         };
 
         const methods = {
             push() {
                 const val = document.getElementById("itemInput").value.trim() || "要素を入力";
-                //if (!val) return state.updateDisplay();
                 
                 state.arr.push(val);
                 state.updateDisplay(state.arr.length - 1, "highlight-add");
+                
+                // Добавляем пересчёт splice после анимации
+                setTimeout(() => {
+                    state.updateSpliceInfo();
+                }, 400);
             },
 
             unshift() {
                 const val = document.getElementById("itemInput").value.trim() || "要素を入力";
-                //if (!val) return state.updateDisplay();
                 
                 state.arr.unshift(val);
                 state.updateDisplay(0, "highlight-add");
+                
+                setTimeout(() => {
+                    state.updateDisplay(); // Убираем highlight-add
+                    setTimeout(() => {
+                        state.updateSpliceInfo(); // Анимация splice для сдвинутых индексов
+                    }, 50);
+                }, 400);
             },
 
             pop() {
@@ -315,6 +368,7 @@
                 setTimeout(() => {
                     state.arr.pop();
                     state.updateDisplay();
+                    state.updateSpliceInfo(); // Пересчитываем splice
                 }, 500);
             },
 
@@ -324,31 +378,29 @@
                 state.updateDisplay(0, "highlight-remove");
                 setTimeout(() => {
                     state.arr.shift();
-                    state.updateDisplay();
+                    state.updateDisplay(); // Убираем highlight-remove
+                    setTimeout(() => {
+                        state.updateSpliceInfo(); // Анимация splice для сдвинутых индексов
+                    }, 50);
                 }, 500);
             },
 
             splice() {
                 const start = parseInt(document.getElementById("spliceA").value, 10);
                 const count = parseInt(document.getElementById("spliceB").value, 10);
-                if (isNaN(count)) return;
                 
-                if (isNaN(start) || state.arr.length === 0) return;
+                if (isNaN(count) || isNaN(start) || state.arr.length === 0) return;
                 
-                // Подсветка элементов перед удалением
-                const display = document.getElementById("arrayDisplay");
-                const spans = display.querySelectorAll("span");
-                
+                const indicesToRemove = [];
                 for (let i = start; i < start + count && i < state.arr.length; i++) {
-                    if (spans[i]) {
-                        spans[i].classList.add("highlight-remove");
-                    }
+                    indicesToRemove.push(i);
                 }
+                
+                state.updateDisplay(indicesToRemove, "highlight-remove");
                 
                 setTimeout(() => {
                     state.arr.splice(start, count);
-                    state.updateDisplay();
-                    state.updateSpliceInfo();
+                    state.updateSpliceInfo(); // Уже есть, всё правильно
                 }, 500);
             },
 
