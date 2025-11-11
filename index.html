@@ -514,7 +514,8 @@
 
         function copyArrayToClipboard() {
             // Формируем строку кода
-            const arrayCode = `arr = ${JSON.stringify(state.arr, null, 0)};`;
+            //const arrayCode = `arr = ${JSON.stringify(state.arr, null, 0)};`;
+            const arrayCode = `arr = ["${state.arr.join('", "')}"];`;
             
             // Копируем в буфер обмена
             navigator.clipboard.writeText(arrayCode).then(() => {
