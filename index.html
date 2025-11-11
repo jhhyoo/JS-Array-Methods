@@ -45,19 +45,21 @@
             white-space: normal;
             word-wrap: break-word;
             overflow-wrap: anywhere;
+            cursor: pointer;
+            user-select: none;
         }
         #arrayDisplay span {
             transition: color 0.5s ease;
             display: inline-block;
-}
+        }
         .section {
             background: #3a3a3a;
             padding: 1rem;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            /* min-width: 300px; */
             flex-wrap: nowrap;
             user-select: none;
+            /* min-width: 300px; */
         }
         .section-title {
             font-size: 0.85rem;
@@ -84,9 +86,12 @@
             border: 1px solid #555;
             border-radius: 4px;
             text-align: center;
-            transition: border-color 0.3s;
+            transition: border-color 0.3s ease;
             background: #2a2a2a;
             color: #e0e0e0;
+        }
+        input:hover {
+            border-color: #667eea;
         }
         input:focus {
             outline: none;
@@ -116,9 +121,37 @@
         button:active {
             transform: scale(0.98);
         }
-        .quick-btn:hover {
-            background: #4a4a4a;
-            color: #e0e0e0;
+        #negativeIndexToggle {
+            appearance: none;                    /* Убираем нативный стиль браузера */
+            -webkit-appearance: none;            /* Для Safari */
+            -moz-appearance: none;               /* Для Firefox */
+            min-width: 18px;
+            height: 18px;
+            border: 1px solid #555;            /* Серая рамка */
+            border-radius: 4px;                  /* Скруглённые углы */
+            background: #2a2a2a;               /* Тёмный фон (ваш цвет) */
+            cursor: pointer;
+            position: relative;                  /* Для позиционирования галочки */
+            transition: all 0.3s ease;           /* Плавная анимация */
+            margin: 0;
+        }
+        #negativeIndexToggle:hover {
+            border-color: #667eea;             /* Фиолетовая рамка при наведении */
+        }
+        #negativeIndexToggle:checked::after {
+            content: '';                         /* Создаём псевдоэлемент */
+            position: absolute;
+            left: 50%;                           /* Центрируем по горизонтали */
+            top: 50%;                            /* Центрируем по вертикали */
+            transform: translate(-50%, -50%);    /* Идеальное центрирование */
+            width: 8px;                         /* Размер квадратика */
+            height: 8px;
+            background: #667eea;
+            border-radius: 2px;
+        }
+        #negativeIndexToggle:focus {
+            outline: none;                       /* Убираем стандартный outline */
+            border-color: #667eea;             /* Синее свечение */
         }
         .method-group {
             display: grid;
@@ -144,7 +177,7 @@
             animation: shake 0.5s, fadeOut 0.3s 0.2s forwards;
         }
         .highlight-splice {
-            color: #00d9ff !important;
+            color: #66c0ea !important;
         }
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
@@ -196,19 +229,19 @@
         <div class="method-group">
             <div class="method-item">
                 <div class="method-label">→[●,　]</div>
-                <button data-method="unshift">.unshift()</button>
+                <button data-method="unshift" aria-label="最初に追加">.unshift()</button>
             </div>
             <div class="method-item">
                 <div class="method-label">[　,●]←</div>
-                <button data-method="push">.push()</button>
+                <button data-method="push" aria-label="最後に追加">.push()</button>
             </div>
             <div class="method-item">
                 <div class="method-label">←[○,　]</div>
-                <button data-method="shift">.shift()</button>
+                <button data-method="shift" aria-label="最初を削除">.shift()</button>
             </div>
             <div class="method-item">
                 <div class="method-label">[　,○]→</div>
-                <button data-method="pop">.pop()</button>
+                <button data-method="pop" aria-label="最後を削除">.pop()</button>
             </div>
         </div>
     </div>
@@ -216,12 +249,16 @@
     <!-- Splice Section -->
     <div class="section">
         <div class="column">
-            <div class="section-title">位置 a から b 個の要素を削除します</div>
+            <div class="row">
+                <div class="section-title">位置 a から b 個の要素を削除します</div>
+                <input type="checkbox" id="negativeIndexToggle" style="width: auto; cursor: pointer;">
+                <div class="section-title">負の数</div>
+            </div>
             <div class="row">
                 <label>.splice(</label>
-                <input type="text" inputmode="numeric" id="spliceA" value="1" placeholder="a" style="width:40px">
+                <input type="text" inputmode="numeric" id="spliceA" placeholder="a" style="width:40px"> <!-- value="1" -->
                 <label>,</label>
-                <input type="text" inputmode="numeric" id="spliceB" value="1" placeholder="b" style="width:40px">
+                <input type="text" inputmode="numeric" id="spliceB" placeholder="b" style="width:40px"> <!-- value="1" -->
                 <label>)</label>
                 <button data-method="splice">実行</button>
             </div>
@@ -239,10 +276,10 @@
                 <button data-method="join">実行</button>
             </div>
             <div class="row">
-                <button data-join="、">"、"</button>
-                <button data-join=" - ">" - "</button>
-                <button data-join=" | ">" | "</button>
-                <button data-join="　">"　"</button>
+                <button data-join="、" aria-label="読点で区切る">"、"</button>
+                <button data-join=" - " aria-label="ハイフンで区切る">" - "</button>
+                <button data-join=" | " aria-label="縦棒で区切る">" | "</button>
+                <button data-join="　" aria-label="全角スペースで区切る">"　"</button>
             </div>
         </div>
     </div>
@@ -305,7 +342,7 @@
             },
 
             updateSpliceInfo() {
-                const start = parseInt(document.getElementById("spliceA").value, 10);
+                let start = parseInt(document.getElementById("spliceA").value, 10);
                 const count = parseInt(document.getElementById("spliceB").value, 10);
                 const info = document.getElementById("spliceInfo");
                 
@@ -316,17 +353,16 @@
                     return;
                 }
 
+                const actualStart = start < 0 ? Math.max(0, this.arr.length + start) : start;
+
                 const removed = [...this.arr].splice(start, count);
                 info.textContent = removed.length > 0 
                     ? `=　${removed.join("、")}`
                     : "=（削除される要素なし）";
                 
-                // Сохраняем предыдущий диапазон перед обновлением
-                this.prevSpliceHighlight = [...this.spliceHighlight];
-                
                 // Вычисляем новый диапазон
                 this.spliceHighlight = [];
-                for (let i = start; i < start + count && i < this.arr.length; i++) {
+                for (let i = actualStart; i < actualStart + count && i < this.arr.length; i++) {
                     this.spliceHighlight.push(i);
                 }
                 
@@ -386,10 +422,12 @@
             },
 
             splice() {
-                const start = parseInt(document.getElementById("spliceA").value, 10);
+                let start = parseInt(document.getElementById("spliceA").value, 10);
                 const count = parseInt(document.getElementById("spliceB").value, 10);
                 
                 if (isNaN(count) || isNaN(start) || state.arr.length === 0) return;
+
+                const actualStart = start < 0 ? Math.max(0, state.arr.length + start) : start;
                 
                 const indicesToRemove = [];
                 for (let i = start; i < start + count && i < state.arr.length; i++) {
@@ -400,7 +438,7 @@
                 
                 setTimeout(() => {
                     state.arr.splice(start, count);
-                    state.updateSpliceInfo(); // Уже есть, всё правильно
+                    state.updateSpliceInfo();
                 }, 500);
             },
 
@@ -431,7 +469,13 @@
 
         // Input listeners
         document.getElementById("spliceA").addEventListener("input", (e) => {
-            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            const allowNegative = document.getElementById("negativeIndexToggle").checked;
+            if (allowNegative) {
+                // Разрешаем цифры и минус, но минус только в начале
+                e.target.value = e.target.value.replace(/[^0-9-]/g, '').replace(/(.*?-)|(-)/g, '$1');
+            } else {
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            }
             state.updateSpliceInfo();
         });
         document.getElementById("spliceB").addEventListener("input", (e) => {
@@ -444,6 +488,15 @@
         document.getElementById("spliceB").addEventListener("focus", (e) => e.target.select());
         document.getElementById("joinInput").addEventListener("focus", (e) => e.target.select());
 
+        // Обработчик чекбокса для отрицательных индексов
+        document.getElementById("negativeIndexToggle").addEventListener("change", (e) => {
+            const input = document.getElementById("spliceA");
+            if (!e.target.checked) {
+                // Если отключаем отрицательные числа, очищаем минус
+                input.value = input.value.replace(/[^0-9]/g, '');
+            }
+            state.updateSpliceInfo();
+        });
 
         // Прокрутка колёсиком для изменения числовых значений
         ["spliceA", "spliceB"].forEach(id => {
@@ -455,8 +508,15 @@
                 const delta = Math.sign(e.deltaY); // 1 — вниз, -1 — вверх
                 const current = parseInt(input.value || "0", 10);
 
-                // Новое значение, не меньше 0
-                const newValue = Math.max(0, current - delta);
+                // Для spliceA проверяем, разрешены ли отрицательные значения
+                let newValue;
+                if (id === "spliceA" && document.getElementById("negativeIndexToggle").checked) {
+                    // Разрешаем отрицательные значения
+                    newValue = current - delta;
+                } else {
+                    // Новое значение, не меньше 0
+                    newValue = Math.max(0, current - delta);
+                }
 
                 input.value = newValue.toString();
                 state.updateSpliceInfo();
