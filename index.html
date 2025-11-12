@@ -29,6 +29,7 @@
             user-select: none;
         }
         #arrayDisplay {
+            /* display: inline-block; */
             font-family: 'Noto Sans JP', sans-serif;
             font-size: 1.1rem;
             text-align: center;
@@ -38,7 +39,7 @@
             max-width: 700px;
             padding: 1rem 1.5rem;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             position: sticky;
             top: 1rem;
             z-index: 10;
@@ -114,6 +115,7 @@
             background: #4a4a4a;
             color: #e0e0e0;
             transition: all 0.2s;
+            position: relative;
         }
         button:hover {
             background: #5a5a5a;
@@ -125,7 +127,7 @@
             appearance: none;                    /* Убираем нативный стиль браузера */
             -webkit-appearance: none;            /* Для Safari */
             -moz-appearance: none;               /* Для Firefox */
-            min-width: 18px;
+            width: 18px;
             height: 18px;
             border: 1px solid #555;            /* Серая рамка */
             border-radius: 4px;                  /* Скруглённые углы */
@@ -155,18 +157,24 @@
         }
         .method-group {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, minmax(100px, 1fr));  /* Минимум 100px */
             gap: 0.5rem;
+            justify-items: center;  /* Центрируем содержимое ячеек */
         }
         .method-item {
             display: flex;
             flex-direction: column;
             gap: 0.3rem;
             align-items: center;
+            width: 100%;            /* На всю ширину ячейки */
         }
         .method-label {
             font-size: 0.85rem;
-            color: #999;
+            color: #aaa;
+            text-align: center;
+        }
+        .method-item button {
+            width: 100px;           /* Фиксированная ширина для всех кнопок */
         }
         .highlight-add {
             color: #ffd700 !important;
@@ -205,6 +213,52 @@
             color: #aaa;
             font-family: 'Consolas', monospace;
         }
+
+        /* Всплывающие подсказки */
+        /* ===================== */
+
+        /* Контейнер для tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        /* Если внутри tooltip есть input, делаем его на всю ширину */
+        .tooltip input {
+            display: block;
+        }
+        /* Баббл с подсказкой */
+        .tooltip::before,
+        #arrayDisplay::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-4px);
+            
+            background: #4a4a4a;
+            color: #aaa;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            white-space: nowrap;
+            
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+            
+            z-index: 1000;
+            pointer-events: none;
+        }
+        /* Показываем при наведении */
+        .tooltip:hover::before,
+        #arrayDisplay.show-tooltip::before {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -234,19 +288,19 @@
         <div class="method-group">
             <div class="method-item">
                 <div class="method-label">→[●,　]</div>
-                <button data-method="unshift" aria-label="最初に追加">.unshift()</button>
+                <button data-method="unshift" aria-label="最初に追加" class="tooltip" data-tooltip="配列の先頭に要素を追加">.unshift()</button>
             </div>
             <div class="method-item">
                 <div class="method-label">[　,●]←</div>
-                <button data-method="push" aria-label="最後に追加">.push()</button>
+                <button data-method="push" aria-label="最後に追加" class="tooltip" data-tooltip="配列の末尾に要素を追加">.push()</button>
             </div>
             <div class="method-item">
                 <div class="method-label">←[○,　]</div>
-                <button data-method="shift" aria-label="最初を削除">.shift()</button>
+                <button data-method="shift" aria-label="最初を削除" class="tooltip" data-tooltip="配列の先頭から要素を削除">.shift()</button>
             </div>
             <div class="method-item">
                 <div class="method-label">[　,○]→</div>
-                <button data-method="pop" aria-label="最後を削除">.pop()</button>
+                <button data-method="pop" aria-label="最後を削除" class="tooltip" data-tooltip="配列の末尾から要素を削除">.pop()</button>
             </div>
         </div>
     </div>
@@ -256,14 +310,18 @@
         <div class="column">
             <div class="row">
                 <div class="section-title">位置 a から b 個の要素を削除します</div>
-                <input type="checkbox" id="negativeIndexToggle" style="width: auto; cursor: pointer;">
-                <div class="section-title">負の値</div>
+                <input type="checkbox" id="negativeIndexToggle" class="tooltip" data-tooltip="負の数で配列の末尾から位置を指定">
+                <div class="section-title">負の数</div>
             </div>
             <div class="row">
                 <label>.splice(</label>
-                <input type="text" inputmode="numeric" id="spliceA" placeholder="a" style="width:40px"> <!-- value="1" -->
+                <span class="tooltip" data-tooltip="開始位置（インデックス）">
+                    <input type="text" inputmode="numeric" id="spliceA" placeholder="a" style="width:40px"> <!-- value="1" -->
+                </span>
                 <label>,</label>
-                <input type="text" inputmode="numeric" id="spliceB" placeholder="b" style="width:40px"> <!-- value="1" -->
+                <span class="tooltip" data-tooltip="削除する要素の個数">
+                    <input type="text" inputmode="numeric" id="spliceB" placeholder="b" style="width:40px"> <!-- value="1" -->
+                </span>
                 <label>)</label>
                 <button data-method="splice">実行</button>
             </div>
@@ -513,18 +571,37 @@
         });
 
         function copyArrayToClipboard() {
+            const display = document.getElementById("arrayDisplay");
+            
             // Формируем строку кода
-            //const arrayCode = `arr = ${JSON.stringify(state.arr, null, 0)};`;
             const arrayCode = `arr = ["${state.arr.join('", "')}"];`;
             
             // Копируем в буфер обмена
             navigator.clipboard.writeText(arrayCode).then(() => {
-                // При успехе:
-                //
+                // Устанавливаем текст tooltip
+                display.setAttribute('data-tooltip', '配列をコピーしました');
+                
+                // Принудительный reflow для применения начального состояния
+                void display.offsetHeight;
+                
+                // Показываем tooltip с плавной анимацией
+                requestAnimationFrame(() => {
+                    display.classList.add('show-tooltip');
+                });
+                
+                // Убираем через 1 секунду
+                setTimeout(() => {
+                    display.classList.remove('show-tooltip');
+                    
+                    // Очищаем атрибут после завершения анимации исчезновения
+                    setTimeout(() => {
+                        display.removeAttribute('data-tooltip');
+                    }, 200);
+                }, 1000);
             }).catch(err => {
                 console.error("Ошибка копирования:", err);
             });
-        }
+        };
 
         // Прокрутка колёсиком для изменения числовых значений
         ["spliceA", "spliceB"].forEach(id => {
