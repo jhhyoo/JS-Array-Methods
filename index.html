@@ -478,6 +478,9 @@
             
             // Таймер для операции join
             joinTimer: null,
+            
+            // Флаг блокировки операции копирования
+            isCopyInProgress: false,
 
             /**
              * Получает ссылку на DOM-элемент дисплея массива
@@ -1023,6 +1026,10 @@
              * @private
              */
             async _handleArrayDisplayClick() {
+                // Защита от множественных кликов
+                if (AppState.isCopyInProgress) return;
+                
+                AppState.isCopyInProgress = true;
                 const display = AppState.getDisplayElement();
                 
                 try {
@@ -1048,6 +1055,8 @@
                     
                 } catch (error) {
                     console.error('Ошибка копирования в буфер обмена:', error);
+                } finally {
+                    AppState.isCopyInProgress = false;
                 }
             },
 
