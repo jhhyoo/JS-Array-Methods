@@ -348,6 +348,31 @@
     </div>
 
     <script>
+
+        // Константы
+        const TIMING = {
+            HIGHLIGHT_ADD: 400,      // Длительность анимации добавления
+            HIGHLIGHT_REMOVE: 500,   // Длительность анимации удаления
+            SPLICE_UPDATE: 50        // Задержка перед обновлением splice
+        };
+        // Утилита
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        };
+        // Escaping
+        function escapeHtml(str) {
+
+            const map = {
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                "'": '&#39;'
+            };
+            
+            return String(str).replace(/[<>&"']/g, char => map[char]);
+        };
+
         const state = {
             arr: ["こ", "ん", "に", "ち", "は"],
             spliceHighlight: [],
@@ -365,10 +390,7 @@
                 // Если количество элементов изменилось - полный перерендер
                 if (existingSpans.length !== this.arr.length) {
                     display.innerHTML = "[" + this.arr.map((item, i) => {
-                        const safe = String(item).replace(/[<>&"']/g, c => ({
-                            '<': '&lt;', '>': '&gt;', '&': '&amp;',
-                            '"': '&quot;', "'": '&#39;'
-                        }[c]));
+                        const safe = escapeHtml(item);
                         
                         let cls = "";
                         if (highlightClass && indices.includes(i)) {
@@ -437,57 +459,56 @@
         };
 
         const methods = {
-            push() {
+            async push() {
                 const val = document.getElementById("itemInput").value.trim() || "要素を入力";
                 
                 state.arr.push(val);
                 state.updateDisplay(state.arr.length - 1, "highlight-add");
                 
-                // Добавляем пересчёт splice после анимации
-                setTimeout(() => {
-                    state.updateSpliceInfo();
-                }, 400);
+                // Пересчёт splice после анимации
+                await delay(TIMING.HIGHLIGHT_ADD);
+                state.updateSpliceInfo();
             },
 
-            unshift() {
+            async unshift() {
                 const val = document.getElementById("itemInput").value.trim() || "要素を入力";
                 
                 state.arr.unshift(val);
                 state.updateDisplay(0, "highlight-add");
                 
-                setTimeout(() => {
-                    state.updateDisplay(); // Убираем highlight-add
-                    setTimeout(() => {
-                        state.updateSpliceInfo(); // Анимация splice для сдвинутых индексов
-                    }, 50);
-                }, 400);
+                await delay(TIMING.HIGHLIGHT_ADD);
+                state.updateDisplay(); // Убираем highlight-add
+
+                await delay(TIMING.SPLICE_UPDATE);
+                state.updateSpliceInfo(); // Анимация splice для сдвинутых индексов
             },
 
-            pop() {
+            async pop() {
                 if (state.arr.length === 0) return;
                 
                 state.updateDisplay(state.arr.length - 1, "highlight-remove");
-                setTimeout(() => {
-                    state.arr.pop();
-                    state.updateDisplay();
-                    state.updateSpliceInfo(); // Пересчитываем splice
-                }, 500);
+                
+                // Пересчёт splice после анимации
+                await delay(TIMING.HIGHLIGHT_REMOVE);
+                state.arr.pop();
+                state.updateDisplay();
+                state.updateSpliceInfo();
             },
 
-            shift() {
+            async shift() {
                 if (state.arr.length === 0) return;
                 
                 state.updateDisplay(0, "highlight-remove");
-                setTimeout(() => {
-                    state.arr.shift();
-                    state.updateDisplay(); // Убираем highlight-remove
-                    setTimeout(() => {
-                        state.updateSpliceInfo(); // Анимация splice для сдвинутых индексов
-                    }, 50);
-                }, 500);
+                
+                await delay(TIMING.HIGHLIGHT_REMOVE);
+                state.arr.shift();
+                state.updateDisplay(); // Убираем highlight-remove
+                
+                await delay(TIMING.SPLICE_UPDATE);
+                state.updateSpliceInfo(); // Анимация splice для сдвинутых индексов
             },
 
-            splice() {
+            async splice() {
                 let start = parseInt(document.getElementById("spliceA").value, 10);
                 const count = parseInt(document.getElementById("spliceB").value, 10);
                 
@@ -502,15 +523,36 @@
                 
                 state.updateDisplay(indicesToRemove, "highlight-remove");
                 
-                setTimeout(() => {
-                    state.arr.splice(start, count);
-                    state.updateSpliceInfo();
-                }, 500);
+                await delay(TIMING.HIGHLIGHT_REMOVE);
+                state.arr.splice(start, count);
+                state.updateSpliceInfo();
             },
 
-            join() {
+            async join() {
                 const sep = document.getElementById("joinInput").value;
-                document.getElementById("arrayDisplay").textContent = state.arr.join(sep);
+                const display = document.getElementById("arrayDisplay");
+                
+                // Отменяем предыдущий таймер, если он есть
+                if (this._joinTimer) {
+                    clearTimeout(this._joinTimer);
+                    this._joinTimer = null;
+                }
+                
+                // Показываем результат зелёным цветом
+                display.textContent = state.arr.join(sep);
+                display.style.color = "#4ade80"; // Зелёный цвет
+                display.style.transition = "color 0.3s ease";
+                
+                // Через 2 секунды возвращаем обычное отображение
+                this._joinTimer = setTimeout(() => {
+                    display.style.color = "#667eea"; // Возвращаем фиолетовый
+                    
+                    // Ещё через 0.3 секунды (после анимации) восстанавливаем массив
+                    setTimeout(() => {
+                        state.updateDisplay();
+                        this._joinTimer = null;
+                    }, 300);
+                }, 2000);
             }
         };
 
@@ -570,37 +612,36 @@
             state.updateSpliceInfo();
         });
 
-        function copyArrayToClipboard() {
+        async function copyArrayToClipboard() {
             const display = document.getElementById("arrayDisplay");
             
-            // Формируем строку кода
-            const arrayCode = `arr = ["${state.arr.join('", "')}"];`;
-            
-            // Копируем в буфер обмена
-            navigator.clipboard.writeText(arrayCode).then(() => {
+            try {
+                // Формируем строку кода
+                const arrayCode = `arr = ["${state.arr.join('", "')}"];`;
+                // Копируем в буфер обмена
+                await navigator.clipboard.writeText(arrayCode);
+                
                 // Устанавливаем текст tooltip
                 display.setAttribute('data-tooltip', '配列をコピーしました');
-                
                 // Принудительный reflow для применения начального состояния
                 void display.offsetHeight;
-                
                 // Показываем tooltip с плавной анимацией
                 requestAnimationFrame(() => {
                     display.classList.add('show-tooltip');
                 });
                 
-                // Убираем через 1 секунду
-                setTimeout(() => {
-                    display.classList.remove('show-tooltip');
-                    
-                    // Очищаем атрибут после завершения анимации исчезновения
-                    setTimeout(() => {
-                        display.removeAttribute('data-tooltip');
-                    }, 200);
-                }, 1000);
-            }).catch(err => {
+                // Ждем 1 секунду
+                await delay(1000);
+                // Убираем tooltip
+                display.classList.remove('show-tooltip');
+                // Ждем завершения анимации исчезновения
+                await delay(200);
+                // Очищаем атрибут
+                display.removeAttribute('data-tooltip');
+                
+            } catch (err) {
                 console.error("Ошибка копирования:", err);
-            });
+            }
         };
 
         // Прокрутка колёсиком для изменения числовых значений
