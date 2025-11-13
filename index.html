@@ -29,7 +29,6 @@
             user-select: none;
         }
         #arrayDisplay {
-            /* display: inline-block; */
             font-family: 'Noto Sans JP', sans-serif;
             font-size: 1.1rem;
             text-align: center;
@@ -47,6 +46,10 @@
             word-wrap: break-word;
             overflow-wrap: anywhere;
             cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+        #arrayDisplay:active {
+            transform: scale(0.98);
         }
         #arrayDisplay span {
             transition: color 0.5s ease;
@@ -58,9 +61,7 @@
             padding: 1rem;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            flex-wrap: nowrap;
             user-select: none;
-            /* min-width: 300px; */
         }
         .section-title {
             font-size: 0.85rem;
@@ -117,56 +118,60 @@
             transition: all 0.2s;
             position: relative;
         }
-        button:hover {
+        button:hover:not(:disabled) {
             background: #5a5a5a;
         }
-        button:active {
+        button:active:not(:disabled) {
             transform: scale(0.98);
         }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         #negativeIndexToggle {
-            appearance: none;                    /* Убираем нативный стиль браузера */
-            -webkit-appearance: none;            /* Для Safari */
-            -moz-appearance: none;               /* Для Firefox */
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
             width: 18px;
             height: 18px;
-            border: 1px solid #555;            /* Серая рамка */
-            border-radius: 4px;                  /* Скруглённые углы */
-            background: #2a2a2a;               /* Тёмный фон (ваш цвет) */
+            border: 1px solid #555;
+            border-radius: 4px;
+            background: #2a2a2a;
             cursor: pointer;
-            position: relative;                  /* Для позиционирования галочки */
-            transition: all 0.3s ease;           /* Плавная анимация */
+            position: relative;
+            transition: all 0.3s ease;
             margin: 0;
         }
         #negativeIndexToggle:hover {
-            border-color: #667eea;             /* Фиолетовая рамка при наведении */
+            border-color: #667eea;
         }
         #negativeIndexToggle:checked::after {
-            content: '';                         /* Создаём псевдоэлемент */
+            content: '';
             position: absolute;
-            left: 50%;                           /* Центрируем по горизонтали */
-            top: 50%;                            /* Центрируем по вертикали */
-            transform: translate(-50%, -50%);    /* Идеальное центрирование */
-            width: 8px;                         /* Размер квадратика */
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
             height: 8px;
             background: #667eea;
             border-radius: 2px;
         }
         #negativeIndexToggle:focus {
-            outline: none;                       /* Убираем стандартный outline */
-            border-color: #667eea;             /* Синее свечение */
+            outline: none;
+            border-color: #667eea;
         }
         .method-group {
             display: grid;
-            grid-template-columns: repeat(2, minmax(100px, 1fr));  /* Минимум 100px */
+            grid-template-columns: repeat(2, minmax(100px, 1fr));
             gap: 0.5rem;
-            justify-items: center;  /* Центрируем содержимое ячеек */
+            justify-items: center;
         }
         .method-item {
             display: flex;
             flex-direction: column;
             gap: 0.3rem;
             align-items: center;
-            width: 100%;            /* На всю ширину ячейки */
+            width: 100%;
         }
         .method-label {
             font-size: 0.85rem;
@@ -174,7 +179,7 @@
             text-align: center;
         }
         .method-item button {
-            width: 100px;           /* Фиксированная ширина для всех кнопок */
+            width: 100px;
         }
         .highlight-add {
             color: #ffd700 !important;
@@ -213,20 +218,13 @@
             color: #aaa;
             font-family: 'Consolas', monospace;
         }
-
-        /* Всплывающие подсказки */
-        /* ===================== */
-
-        /* Контейнер для tooltip */
         .tooltip {
             position: relative;
             display: inline-block;
         }
-        /* Если внутри tooltip есть input, делаем его на всю ширину */
         .tooltip input {
             display: block;
         }
-        /* Баббл с подсказкой */
         .tooltip::before,
         #arrayDisplay::before {
             content: attr(data-tooltip);
@@ -234,7 +232,6 @@
             bottom: calc(100% + 8px);
             left: 50%;
             transform: translateX(-50%) translateY(-4px);
-            
             background: #4a4a4a;
             color: #aaa;
             padding: 0.5rem 0.75rem;
@@ -242,17 +239,13 @@
             font-size: 0.85rem;
             line-height: 1.4;
             white-space: nowrap;
-            
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
-            
             z-index: 1000;
             pointer-events: none;
         }
-        /* Показываем при наведении */
         .tooltip:hover::before,
         #arrayDisplay.show-tooltip::before {
             opacity: 1;
@@ -316,11 +309,11 @@
             <div class="row">
                 <label>.splice(</label>
                 <span class="tooltip" data-tooltip="開始位置（インデックス）">
-                    <input type="text" inputmode="numeric" id="spliceA" placeholder="a" style="width:40px"> <!-- value="1" -->
+                    <input type="text" inputmode="numeric" id="spliceStart" placeholder="a" style="width:40px">
                 </span>
                 <label>,</label>
                 <span class="tooltip" data-tooltip="削除する要素の個数">
-                    <input type="text" inputmode="numeric" id="spliceB" placeholder="b" style="width:40px"> <!-- value="1" -->
+                    <input type="text" inputmode="numeric" id="spliceCount" placeholder="b" style="width:40px">
                 </span>
                 <label>)</label>
                 <button data-method="splice">実行</button>
@@ -348,330 +341,769 @@
     </div>
 
     <script>
+        'use strict';
 
-        // Константы
-        const TIMING = {
-            HIGHLIGHT_ADD: 400,      // Длительность анимации добавления
-            HIGHLIGHT_REMOVE: 500,   // Длительность анимации удаления
-            SPLICE_UPDATE: 50        // Задержка перед обновлением splice
-        };
-        // Утилита
-        function delay(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        };
-        // Escaping
-        function escapeHtml(str) {
+        // ============================================================================
+        // КОНФИГУРАЦИЯ
+        // ============================================================================
 
-            const map = {
-                '<': '&lt;',
-                '>': '&gt;',
-                '&': '&amp;',
-                '"': '&quot;',
-                "'": '&#39;'
-            };
-            
-            return String(str).replace(/[<>&"']/g, char => map[char]);
+        /**
+         * Константы времени для анимаций (в миллисекундах)
+         */
+        const ANIMATION_TIMING = {
+            HIGHLIGHT_ADD: 400,        // Длительность подсветки добавленного элемента
+            HIGHLIGHT_REMOVE: 500,     // Длительность подсветки удалённого элемента
+            SPLICE_UPDATE_DELAY: 50,   // Задержка перед обновлением splice-подсветки
+            JOIN_DISPLAY: 2000,        // Время показа результата join
+            JOIN_FADE: 300,            // Время анимации возврата после join
+            TOOLTIP_HIDE_DELAY: 200    // Задержка скрытия tooltip
         };
 
-        const state = {
-            arr: ["こ", "ん", "に", "ち", "は"],
-            spliceHighlight: [],
-            
-            updateDisplay(highlightIndices = null, highlightClass = "") {
-                const display = document.getElementById("arrayDisplay");
-                
-                const indices = highlightIndices === null 
-                    ? this.spliceHighlight 
-                    : (Array.isArray(highlightIndices) ? highlightIndices : [highlightIndices]);
-                
-                // Сохраняем существующие span элементы
-                const existingSpans = Array.from(display.querySelectorAll('span'));
-                
-                // Если количество элементов изменилось - полный перерендер
-                if (existingSpans.length !== this.arr.length) {
-                    display.innerHTML = "[" + this.arr.map((item, i) => {
-                        const safe = escapeHtml(item);
-                        
-                        let cls = "";
-                        if (highlightClass && indices.includes(i)) {
-                            cls = highlightClass;
-                        } else if (this.spliceHighlight.includes(i)) {
-                            cls = "highlight-splice";
-                        }
-                        
-                        const comma = i < this.arr.length - 1 ? ",\u00A0" : "";
-                        return `<span class="${cls}">"${safe}"${comma}</span>`;
-                    }).join("") + "]";
-                } 
-                // Если количество то же - просто обновляем классы (transition сработает)
-                else {
-                    existingSpans.forEach((span, i) => {
-                        // Убираем все классы подсветки
-                        span.className = "";
-                        
-                        // Добавляем нужные классы
-                        if (highlightClass && indices.includes(i)) {
-                            span.className = highlightClass;
-                        } else if (this.spliceHighlight.includes(i)) {
-                            span.className = "highlight-splice";
-                        }
-                    });
+        /**
+         * Цвета для различных состояний
+         */
+        const COLORS = {
+            DEFAULT: '#667eea',   // Основной цвет массива
+            JOIN_RESULT: '#4ade80' // Цвет результата join
+        };
+
+        /**
+         * Сообщения приложения
+         */
+        const MESSAGES = {
+            DEFAULT_ITEM: '要素を入力',
+            NO_ITEMS_REMOVED: '=（削除される要素なし）',
+            COPIED_TOOLTIP: '配列をコピーしました'
+        };
+
+        /**
+         * Регулярные выражения для валидации ввода
+         */
+        const INPUT_PATTERNS = {
+            POSITIVE_INTEGER: /[^0-9]/g,
+            INTEGER: /[^0-9-]/g,
+            LEADING_MINUS: /(.*?-)|(-)/g  // Оставляет только первый минус
+        };
+
+        // ============================================================================
+        // УТИЛИТЫ
+        // ============================================================================
+
+        /**
+         * Утилиты для работы с промисами и задержками
+         */
+        const Utils = {
+            /**
+             * Создаёт промис с задержкой
+             * @param {number} ms - Время задержки в миллисекундах
+             * @returns {Promise<void>}
+             */
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            },
+
+            /**
+             * Экранирует HTML-символы для безопасного отображения
+             * @param {string} str - Строка для экранирования
+             * @returns {string} Экранированная строка
+             */
+            escapeHtml(str) {
+                const map = {
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '&': '&amp;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                };
+                return String(str).replace(/[<>&"']/g, char => map[char]);
+            },
+
+            /**
+             * Безопасно парсит целое число
+             * @param {string} value - Строка для парсинга
+             * @param {number} defaultValue - Значение по умолчанию
+             * @returns {number} Распарсенное число или значение по умолчанию
+             */
+            parseIntSafe(value, defaultValue = 0) {
+                const parsed = parseInt(value, 10);
+                return isNaN(parsed) ? defaultValue : parsed;
+            }
+        };
+
+        /**
+         * Утилиты для работы с DOM
+         */
+        const DOMUtils = {
+            /**
+             * Получает элемент по ID с проверкой на существование
+             * @param {string} id - ID элемента
+             * @returns {HTMLElement} Найденный элемент
+             * @throws {Error} Если элемент не найден
+             */
+            getElementById(id) {
+                const element = document.getElementById(id);
+                if (!element) {
+                    throw new Error(`Element with id "${id}" not found`);
                 }
+                return element;
+            },
 
-                if (highlightClass === "highlight-add") {
-                    setTimeout(() => {
-                        const spans = display.querySelectorAll(`.${highlightClass}`);
-                        spans.forEach(span => span.className = "");
-                    }, 400);
+            /**
+             * Устанавливает disabled состояние для всех кнопок методов
+             * @param {boolean} disabled - Флаг disabled
+             */
+            setMethodButtonsDisabled(disabled) {
+                document.querySelectorAll('button[data-method]').forEach(btn => {
+                    btn.disabled = disabled;
+                });
+            }
+        };
+
+        // ============================================================================
+        // СОСТОЯНИЕ ПРИЛОЖЕНИЯ
+        // ============================================================================
+
+        /**
+         * Менеджер состояния массива и UI
+         */
+        const AppState = {
+            // Текущий массив элементов
+            array: ["こ", "ん", "に", "ち", "は"],
+            
+            // Индексы элементов, подсвеченных для splice
+            spliceHighlightIndices: [],
+            
+            // Флаг блокировки операций (защита от race conditions)
+            isOperationLocked: false,
+            
+            // Таймер для операции join
+            joinTimer: null,
+
+            /**
+             * Получает ссылку на DOM-элемент дисплея массива
+             * @returns {HTMLElement}
+             */
+            getDisplayElement() {
+                return DOMUtils.getElementById('arrayDisplay');
+            },
+
+            /**
+             * Блокирует выполнение операций
+             */
+            lock() {
+                this.isOperationLocked = true;
+                DOMUtils.setMethodButtonsDisabled(true);
+            },
+
+            /**
+             * Разблокирует выполнение операций
+             */
+            unlock() {
+                this.isOperationLocked = false;
+                DOMUtils.setMethodButtonsDisabled(false);
+            },
+
+            /**
+             * Проверяет, заблокированы ли операции
+             * @returns {boolean}
+             */
+            isLocked() {
+                return this.isOperationLocked;
+            },
+
+            /**
+             * Очищает таймер join, если он существует
+             */
+            clearJoinTimer() {
+                if (this.joinTimer !== null) {
+                    clearTimeout(this.joinTimer);
+                    this.joinTimer = null;
                 }
             },
 
-            updateSpliceInfo() {
-                let start = parseInt(document.getElementById("spliceA").value, 10);
-                const count = parseInt(document.getElementById("spliceB").value, 10);
-                const info = document.getElementById("spliceInfo");
+            /**
+             * Обновляет отображение массива в UI
+             * @param {number[]|null} highlightIndices - Индексы для подсветки (null = использовать splice-подсветку)
+             * @param {string} highlightClass - CSS-класс для подсветки
+             */
+            updateDisplay(highlightIndices = null, highlightClass = '') {
+                const display = this.getDisplayElement();
                 
-                if (isNaN(count) || isNaN(start)) {
-                    info.textContent = "";
-                    this.spliceHighlight = [];
+                // Определяем, какие индексы подсвечивать
+                const indicesToHighlight = highlightIndices === null 
+                    ? this.spliceHighlightIndices 
+                    : (Array.isArray(highlightIndices) ? highlightIndices : [highlightIndices]);
+                
+                const existingSpans = Array.from(display.querySelectorAll('span'));
+                
+                // Если количество элементов изменилось - полный перерендер
+                if (existingSpans.length !== this.array.length) {
+                    display.innerHTML = this._generateArrayHTML(indicesToHighlight, highlightClass);
+                } else {
+                    // Иначе просто обновляем CSS-классы (используем CSS transitions)
+                    this._updateSpanClasses(existingSpans, indicesToHighlight, highlightClass);
+                }
+
+                // Автоматически убираем класс добавления через заданное время
+                if (highlightClass === 'highlight-add') {
+                    setTimeout(() => {
+                        display.querySelectorAll(`.${highlightClass}`).forEach(span => {
+                            span.className = '';
+                        });
+                    }, ANIMATION_TIMING.HIGHLIGHT_ADD);
+                }
+            },
+
+            /**
+             * Генерирует HTML-разметку массива
+             * @param {number[]} indicesToHighlight - Индексы для подсветки
+             * @param {string} highlightClass - CSS-класс для подсветки
+             * @returns {string} HTML-строка
+             * @private
+             */
+            _generateArrayHTML(indicesToHighlight, highlightClass) {
+                const items = this.array.map((item, index) => {
+                    const escapedItem = Utils.escapeHtml(item);
+                    const cssClass = this._getSpanClass(index, indicesToHighlight, highlightClass);
+                    const comma = index < this.array.length - 1 ? ',\u00A0' : '';
+                    return `<span class="${cssClass}">"${escapedItem}"${comma}</span>`;
+                });
+                
+                return `[${items.join('')}]`;
+            },
+
+            /**
+             * Обновляет CSS-классы существующих span-элементов
+             * @param {HTMLElement[]} spans - Массив span-элементов
+             * @param {number[]} indicesToHighlight - Индексы для подсветки
+             * @param {string} highlightClass - CSS-класс для подсветки
+             * @private
+             */
+            _updateSpanClasses(spans, indicesToHighlight, highlightClass) {
+                spans.forEach((span, index) => {
+                    span.className = this._getSpanClass(index, indicesToHighlight, highlightClass);
+                });
+            },
+
+            /**
+             * Определяет CSS-класс для элемента массива
+             * @param {number} index - Индекс элемента
+             * @param {number[]} indicesToHighlight - Индексы для подсветки
+             * @param {string} highlightClass - CSS-класс для подсветки
+             * @returns {string} CSS-класс
+             * @private
+             */
+            _getSpanClass(index, indicesToHighlight, highlightClass) {
+                if (highlightClass && indicesToHighlight.includes(index)) {
+                    return highlightClass;
+                }
+                if (this.spliceHighlightIndices.includes(index)) {
+                    return 'highlight-splice';
+                }
+                return '';
+            },
+
+            /**
+             * Обновляет информацию и подсветку для операции splice
+             */
+            updateSpliceInfo() {
+                const startInput = DOMUtils.getElementById('spliceStart');
+                const countInput = DOMUtils.getElementById('spliceCount');
+                const infoElement = DOMUtils.getElementById('spliceInfo');
+                
+                const start = Utils.parseIntSafe(startInput.value, NaN);
+                const count = Utils.parseIntSafe(countInput.value, NaN);
+                
+                // Если данные невалидны - очищаем
+                if (isNaN(start) || isNaN(count)) {
+                    infoElement.textContent = '';
+                    this.spliceHighlightIndices = [];
                     this.updateDisplay();
                     return;
                 }
 
-                //const actualStart = start < 0 ? Math.max(0, this.arr.length + start) : start;
-                const actualStart = start < 0 
-                    ? Math.max(0, this.arr.length + start)  // Отрицательный
-                    : Math.min(start, this.arr.length);     // Положительный (обрезаем до length)
-
-                const removed = [...this.arr].splice(start, count);
-                info.textContent = removed.length > 0 
-                    ? `=　${removed.join("、")}`
-                    : "=（削除される要素なし）";
+                // Вычисляем реальную начальную позицию
+                const actualStart = this._normalizeIndex(start);
                 
-                // Вычисляем новый диапазон
-                this.spliceHighlight = [];
-                for (let i = actualStart; i < actualStart + count && i < this.arr.length; i++) {
-                    this.spliceHighlight.push(i);
-                }
+                // Создаём копию массива и выполняем splice для предпросмотра
+                const previewArray = [...this.array];
+                const removedItems = previewArray.splice(actualStart, count);
+                
+                // Обновляем информационное сообщение
+                infoElement.textContent = removedItems.length > 0 
+                    ? `=　${removedItems.join('、')}`
+                    : MESSAGES.NO_ITEMS_REMOVED;
+                
+                // Вычисляем индексы для подсветки
+                this.spliceHighlightIndices = this._calculateSpliceIndices(actualStart, count);
                 
                 this.updateDisplay();
+            },
+
+            /**
+             * Нормализует индекс (обрабатывает отрицательные значения)
+             * @param {number} index - Исходный индекс
+             * @returns {number} Нормализованный индекс
+             * @private
+             */
+            _normalizeIndex(index) {
+                if (index < 0) {
+                    return Math.max(0, this.array.length + index);
+                }
+                return Math.min(index, this.array.length);
+            },
+
+            /**
+             * Вычисляет индексы элементов для подсветки в splice
+             * @param {number} start - Начальная позиция
+             * @param {number} count - Количество элементов
+             * @returns {number[]} Массив индексов
+             * @private
+             */
+            _calculateSpliceIndices(start, count) {
+                const indices = [];
+                const end = Math.min(start + count, this.array.length);
+                
+                for (let i = start; i < end; i++) {
+                    indices.push(i);
+                }
+                
+                return indices;
             }
         };
 
-        const methods = {
+        // ============================================================================
+        // МЕТОДЫ РАБОТЫ С МАССИВАМИ
+        // ============================================================================
+
+        /**
+         * Реализация методов работы с массивами
+         */
+        const ArrayMethods = {
+            /**
+             * Добавляет элемент в конец массива (.push)
+             */
             async push() {
-                const val = document.getElementById("itemInput").value.trim() || "要素を入力";
-                
-                state.arr.push(val);
-                state.updateDisplay(state.arr.length - 1, "highlight-add");
-                
-                // Пересчёт splice после анимации
-                await delay(TIMING.HIGHLIGHT_ADD);
-                state.updateSpliceInfo();
-            },
+                if (AppState.isLocked()) return;
+                AppState.lock();
 
-            async unshift() {
-                const val = document.getElementById("itemInput").value.trim() || "要素を入力";
-                
-                state.arr.unshift(val);
-                state.updateDisplay(0, "highlight-add");
-                
-                await delay(TIMING.HIGHLIGHT_ADD);
-                state.updateDisplay(); // Убираем highlight-add
-
-                await delay(TIMING.SPLICE_UPDATE);
-                state.updateSpliceInfo(); // Анимация splice для сдвинутых индексов
-            },
-
-            async pop() {
-                if (state.arr.length === 0) return;
-                
-                state.updateDisplay(state.arr.length - 1, "highlight-remove");
-                
-                // Пересчёт splice после анимации
-                await delay(TIMING.HIGHLIGHT_REMOVE);
-                state.arr.pop();
-                state.updateDisplay();
-                state.updateSpliceInfo();
-            },
-
-            async shift() {
-                if (state.arr.length === 0) return;
-                
-                state.updateDisplay(0, "highlight-remove");
-                
-                await delay(TIMING.HIGHLIGHT_REMOVE);
-                state.arr.shift();
-                state.updateDisplay(); // Убираем highlight-remove
-                
-                await delay(TIMING.SPLICE_UPDATE);
-                state.updateSpliceInfo(); // Анимация splice для сдвинутых индексов
-            },
-
-            async splice() {
-                let start = parseInt(document.getElementById("spliceA").value, 10);
-                const count = parseInt(document.getElementById("spliceB").value, 10);
-                
-                if (isNaN(count) || isNaN(start) || state.arr.length === 0) return;
-
-                const actualStart = start < 0 ? Math.max(0, state.arr.length + start) : start;
-                
-                const indicesToRemove = [];
-                for (let i = actualStart; i < actualStart + count && i < state.arr.length; i++) {
-                    indicesToRemove.push(i);
-                }
-                
-                state.updateDisplay(indicesToRemove, "highlight-remove");
-                
-                await delay(TIMING.HIGHLIGHT_REMOVE);
-                state.arr.splice(start, count);
-                state.updateSpliceInfo();
-            },
-
-            async join() {
-                const sep = document.getElementById("joinInput").value;
-                const display = document.getElementById("arrayDisplay");
-                
-                // Отменяем предыдущий таймер, если он есть
-                if (this._joinTimer) {
-                    clearTimeout(this._joinTimer);
-                    this._joinTimer = null;
-                }
-                
-                // Показываем результат зелёным цветом
-                display.textContent = state.arr.join(sep);
-                display.style.color = "#4ade80"; // Зелёный цвет
-                display.style.transition = "color 0.3s ease";
-                
-                // Через 2 секунды возвращаем обычное отображение
-                this._joinTimer = setTimeout(() => {
-                    display.style.color = "#667eea"; // Возвращаем фиолетовый
+                try {
+                    const value = this._getInputValue();
+                    AppState.array.push(value);
                     
-                    // Ещё через 0.3 секунды (после анимации) восстанавливаем массив
-                    setTimeout(() => {
-                        state.updateDisplay();
-                        this._joinTimer = null;
-                    }, 300);
-                }, 2000);
-            }
-        };
-
-        // Event Delegation
-        document.addEventListener("click", (e) => {
-            const btn = e.target.closest("button");
-            if (!btn) {
-                // НОВОЕ: Проверяем клик по дисплею
-                if (e.target.id === "arrayDisplay" || e.target.closest("#arrayDisplay")) {
-                    copyArrayToClipboard();
+                    const addedIndex = AppState.array.length - 1;
+                    AppState.updateDisplay(addedIndex, 'highlight-add');
+                    
+                    await Utils.delay(ANIMATION_TIMING.HIGHLIGHT_ADD);
+                    AppState.updateSpliceInfo();
+                } finally {
+                    AppState.unlock();
                 }
-                return;
-            }
+            },
 
-            const method = btn.dataset.method;
-            const quickValue = btn.dataset.value;
-            const joinValue = btn.dataset.join;
+            /**
+             * Добавляет элемент в начало массива (.unshift)
+             */
+            async unshift() {
+                if (AppState.isLocked()) return;
+                AppState.lock();
 
-            if (method && methods[method]) {
-                methods[method]();
-            } else if (quickValue) {
-                document.getElementById("itemInput").value = quickValue;
-            } else if (joinValue !== undefined) {
-                document.getElementById("joinInput").value = joinValue;
-                methods.join();
-            }
-        });
+                try {
+                    const value = this._getInputValue();
+                    AppState.array.unshift(value);
+                    
+                    AppState.updateDisplay(0, 'highlight-add');
+                    await Utils.delay(ANIMATION_TIMING.HIGHLIGHT_ADD);
+                    
+                    AppState.updateDisplay();
+                    await Utils.delay(ANIMATION_TIMING.SPLICE_UPDATE_DELAY);
+                    
+                    AppState.updateSpliceInfo();
+                } finally {
+                    AppState.unlock();
+                }
+            },
 
-        // Input listeners
-        document.getElementById("spliceA").addEventListener("input", (e) => {
-            const allowNegative = document.getElementById("negativeIndexToggle").checked;
-            if (allowNegative) {
-                // Разрешаем цифры и минус, но минус только в начале
-                e.target.value = e.target.value.replace(/[^0-9-]/g, '').replace(/(.*?-)|(-)/g, '$1');
-            } else {
-                e.target.value = e.target.value.replace(/[^0-9]/g, '');
-            }
-            state.updateSpliceInfo();
-        });
-        document.getElementById("spliceB").addEventListener("input", (e) => {
-            e.target.value = e.target.value.replace(/[^0-9]/g, '');
-            state.updateSpliceInfo();
-        });
-        // Автовыделение при фокусе
-        document.getElementById("itemInput").addEventListener("focus", (e) => e.target.select());
-        document.getElementById("spliceA").addEventListener("focus", (e) => e.target.select());
-        document.getElementById("spliceB").addEventListener("focus", (e) => e.target.select());
-        document.getElementById("joinInput").addEventListener("focus", (e) => e.target.select());
+            /**
+             * Удаляет последний элемент из массива (.pop)
+             */
+            async pop() {
+                if (AppState.isLocked() || AppState.array.length === 0) return;
+                AppState.lock();
 
-        // Обработчик чекбокса для отрицательных индексов
-        document.getElementById("negativeIndexToggle").addEventListener("change", (e) => {
-            const input = document.getElementById("spliceA");
-            if (!e.target.checked) {
-                // Если отключаем отрицательные числа, очищаем минус
-                input.value = input.value.replace(/[^0-9]/g, '');
-            }
-            state.updateSpliceInfo();
-        });
+                try {
+                    const removeIndex = AppState.array.length - 1;
+                    AppState.updateDisplay(removeIndex, 'highlight-remove');
+                    
+                    await Utils.delay(ANIMATION_TIMING.HIGHLIGHT_REMOVE);
+                    AppState.array.pop();
+                    
+                    AppState.updateDisplay();
+                    AppState.updateSpliceInfo();
+                } finally {
+                    AppState.unlock();
+                }
+            },
 
-        async function copyArrayToClipboard() {
-            const display = document.getElementById("arrayDisplay");
-            
-            try {
-                // Формируем строку кода
-                const arrayCode = `arr = ["${state.arr.join('", "')}"];`;
-                // Копируем в буфер обмена
-                await navigator.clipboard.writeText(arrayCode);
+            /**
+             * Удаляет первый элемент из массива (.shift)
+             */
+            async shift() {
+                if (AppState.isLocked() || AppState.array.length === 0) return;
+                AppState.lock();
+
+                try {
+                    AppState.updateDisplay(0, 'highlight-remove');
+                    await Utils.delay(ANIMATION_TIMING.HIGHLIGHT_REMOVE);
+                    
+                    AppState.array.shift();
+                    AppState.updateDisplay();
+                    
+                    await Utils.delay(ANIMATION_TIMING.SPLICE_UPDATE_DELAY);
+                    AppState.updateSpliceInfo();
+                } finally {
+                    AppState.unlock();
+                }
+            },
+
+            /**
+             * Удаляет элементы из массива по позиции (.splice)
+             */
+            async splice() {
+                if (AppState.isLocked() || AppState.array.length === 0) return;
+
+                const startInput = DOMUtils.getElementById('spliceStart');
+                const countInput = DOMUtils.getElementById('spliceCount');
                 
-                // Устанавливаем текст tooltip
-                display.setAttribute('data-tooltip', '配列をコピーしました');
-                // Принудительный reflow для применения начального состояния
-                void display.offsetHeight;
-                // Показываем tooltip с плавной анимацией
-                requestAnimationFrame(() => {
-                    display.classList.add('show-tooltip');
-                });
+                const start = Utils.parseIntSafe(startInput.value, NaN);
+                const count = Utils.parseIntSafe(countInput.value, NaN);
                 
-                // Ждем 1 секунду
-                await delay(1000);
-                // Убираем tooltip
-                display.classList.remove('show-tooltip');
-                // Ждем завершения анимации исчезновения
-                await delay(200);
-                // Очищаем атрибут
-                display.removeAttribute('data-tooltip');
-                
-            } catch (err) {
-                console.error("Ошибка копирования:", err);
+                if (isNaN(start) || isNaN(count)) return;
+
+                AppState.lock();
+
+                try {
+                    // Вычисляем реальную начальную позицию для подсветки
+                    const actualStart = start < 0 
+                        ? Math.max(0, AppState.array.length + start) 
+                        : start;
+                    
+                    const indicesToRemove = [];
+                    for (let i = actualStart; i < actualStart + count && i < AppState.array.length; i++) {
+                        indicesToRemove.push(i);
+                    }
+                    
+                    if (indicesToRemove.length === 0) return;
+                    
+                    AppState.updateDisplay(indicesToRemove, 'highlight-remove');
+                    await Utils.delay(ANIMATION_TIMING.HIGHLIGHT_REMOVE);
+                    
+                    AppState.array.splice(start, count);
+                    AppState.updateSpliceInfo();
+                } finally {
+                    AppState.unlock();
+                }
+            },
+
+            /**
+             * Объединяет элементы массива в строку (.join)
+             */
+            async join() {
+                if (AppState.isLocked()) return;
+                AppState.lock();
+
+                try {
+                    const separator = DOMUtils.getElementById('joinInput').value;
+                    const display = AppState.getDisplayElement();
+                    
+                    // Очищаем предыдущий таймер
+                    AppState.clearJoinTimer();
+                    
+                    // Отображаем результат join
+                    display.textContent = AppState.array.join(separator);
+                    display.style.color = COLORS.JOIN_RESULT;
+                    display.style.transition = 'color 0.3s ease';
+                    
+                    // Через заданное время возвращаем обычное отображение
+                    AppState.joinTimer = setTimeout(() => {
+                        display.style.color = COLORS.DEFAULT;
+                        
+                        setTimeout(() => {
+                            AppState.updateDisplay();
+                            AppState.joinTimer = null;
+                        }, ANIMATION_TIMING.JOIN_FADE);
+                    }, ANIMATION_TIMING.JOIN_DISPLAY);
+                } finally {
+                    AppState.unlock();
+                }
+            },
+
+            /**
+             * Получает значение из поля ввода или возвращает значение по умолчанию
+             * @returns {string}
+             * @private
+             */
+            _getInputValue() {
+                const input = DOMUtils.getElementById('itemInput');
+                return input.value.trim() || MESSAGES.DEFAULT_ITEM;
             }
         };
 
-        // Прокрутка колёсиком для изменения числовых значений
-        ["spliceA", "spliceB"].forEach(id => {
-            const input = document.getElementById(id);
+        // ============================================================================
+        // ОБРАБОТЧИКИ СОБЫТИЙ
+        // ============================================================================
 
-            input.addEventListener("wheel", (e) => {
-                e.preventDefault(); // чтобы страница не прокручивалась
+        /**
+         * Менеджер обработчиков событий
+         */
+        const EventHandlers = {
+            /**
+             * Инициализирует все обработчики событий
+             */
+            init() {
+                this._initClickHandlers();
+                this._initInputHandlers();
+                this._initWheelHandlers();
+                this._initFocusHandlers();
+            },
 
-                const delta = Math.sign(e.deltaY); // 1 — вниз, -1 — вверх
-                const current = parseInt(input.value || "0", 10);
+            /**
+             * Инициализирует обработчики кликов (делегирование событий)
+             * @private
+             */
+            _initClickHandlers() {
+                document.addEventListener('click', (event) => {
+                    const button = event.target.closest('button');
+                    
+                    if (!button) {
+                        // Проверяем клик по дисплею массива
+                        if (event.target.id === 'arrayDisplay' || event.target.closest('#arrayDisplay')) {
+                            this._handleArrayDisplayClick();
+                        }
+                        return;
+                    }
 
-                // Для spliceA проверяем, разрешены ли отрицательные значения
+                    // Обработка различных типов кнопок через data-атрибуты
+                    const methodName = button.dataset.method;
+                    const quickValue = button.dataset.value;
+                    const joinValue = button.dataset.join;
+
+                    if (methodName && ArrayMethods[methodName]) {
+                        ArrayMethods[methodName]();
+                    } else if (quickValue) {
+                        this._setInputValue(quickValue);
+                    } else if (joinValue !== undefined) {
+                        this._setJoinValue(joinValue);
+                        ArrayMethods.join();
+                    }
+                });
+            },
+
+            /**
+             * Инициализирует обработчики ввода
+             * @private
+             */
+            _initInputHandlers() {
+                // Обработчик для splice start (позволяет отрицательные числа)
+                const spliceStart = DOMUtils.getElementById('spliceStart');
+                spliceStart.addEventListener('input', (event) => {
+                    this._handleSpliceStartInput(event);
+                });
+
+                // Обработчик для splice count (только положительные числа)
+                const spliceCount = DOMUtils.getElementById('spliceCount');
+                spliceCount.addEventListener('input', (event) => {
+                    this._sanitizePositiveIntegerInput(event.target);
+                    AppState.updateSpliceInfo();
+                });
+
+                // Обработчик чекбокса отрицательных индексов
+                const negativeToggle = DOMUtils.getElementById('negativeIndexToggle');
+                negativeToggle.addEventListener('change', (event) => {
+                    if (!event.target.checked) {
+                        this._sanitizePositiveIntegerInput(spliceStart);
+                    }
+                    AppState.updateSpliceInfo();
+                });
+            },
+
+            /**
+             * Инициализирует обработчики прокрутки колёсиком мыши для числовых полей
+             * @private
+             */
+            _initWheelHandlers() {
+                const spliceStart = DOMUtils.getElementById('spliceStart');
+                const spliceCount = DOMUtils.getElementById('spliceCount');
+
+                [spliceStart, spliceCount].forEach(input => {
+                    input.addEventListener('wheel', (event) => {
+                        event.preventDefault();
+                        this._handleWheelScroll(event, input);
+                    });
+                });
+            },
+
+            /**
+             * Инициализирует обработчики фокуса (автовыделение текста)
+             * @private
+             */
+            _initFocusHandlers() {
+                const inputs = [
+                    'itemInput',
+                    'spliceStart',
+                    'spliceCount',
+                    'joinInput'
+                ];
+
+                inputs.forEach(id => {
+                    const input = DOMUtils.getElementById(id);
+                    input.addEventListener('focus', (event) => {
+                        event.target.select();
+                    });
+                });
+            },
+
+            /**
+             * Обработчик ввода для splice start (с поддержкой отрицательных чисел)
+             * @param {Event} event
+             * @private
+             */
+            _handleSpliceStartInput(event) {
+                const input = event.target;
+                const allowNegative = DOMUtils.getElementById('negativeIndexToggle').checked;
+
+                if (allowNegative) {
+                    // Разрешаем цифры и минус (только в начале)
+                    input.value = input.value
+                        .replace(INPUT_PATTERNS.INTEGER, '')
+                        .replace(INPUT_PATTERNS.LEADING_MINUS, '$1');
+                } else {
+                    this._sanitizePositiveIntegerInput(input);
+                }
+
+                AppState.updateSpliceInfo();
+            },
+
+            /**
+             * Очищает поле ввода от всех символов, кроме цифр
+             * @param {HTMLInputElement} input
+             * @private
+             */
+            _sanitizePositiveIntegerInput(input) {
+                input.value = input.value.replace(INPUT_PATTERNS.POSITIVE_INTEGER, '');
+            },
+
+            /**
+             * Обработчик прокрутки колёсиком для изменения числовых значений
+             * @param {WheelEvent} event
+             * @param {HTMLInputElement} input
+             * @private
+             */
+            _handleWheelScroll(event, input) {
+                const delta = Math.sign(event.deltaY); // 1 = вниз, -1 = вверх
+                const current = Utils.parseIntSafe(input.value, 0);
+
                 let newValue;
-                if (id === "spliceA" && document.getElementById("negativeIndexToggle").checked) {
-                    // Разрешаем отрицательные значения
+                const isSpliceStart = input.id === 'spliceStart';
+                const allowNegative = isSpliceStart && 
+                    DOMUtils.getElementById('negativeIndexToggle').checked;
+
+                if (allowNegative) {
                     newValue = current - delta;
                 } else {
-                    // Новое значение, не меньше 0
                     newValue = Math.max(0, current - delta);
                 }
 
                 input.value = newValue.toString();
-                state.updateSpliceInfo();
-            });
-        });
+                AppState.updateSpliceInfo();
+            },
 
-        // Initialize
-        state.updateDisplay();
-        state.updateSpliceInfo();
+            /**
+             * Обработчик клика по дисплею массива (копирование в буфер обмена)
+             * @private
+             */
+            async _handleArrayDisplayClick() {
+                const display = AppState.getDisplayElement();
+                
+                try {
+                    // Формируем код массива для копирования
+                    const arrayCode = `arr = ["${AppState.array.join('", "')}"];`;
+                    
+                    // Копируем в буфер обмена
+                    await navigator.clipboard.writeText(arrayCode);
+                    
+                    // Показываем tooltip с анимацией
+                    display.setAttribute('data-tooltip', MESSAGES.COPIED_TOOLTIP);
+                    void display.offsetHeight; // Принудительный reflow
+                    
+                    requestAnimationFrame(() => {
+                        display.classList.add('show-tooltip');
+                    });
+                    
+                    await Utils.delay(1000);
+                    display.classList.remove('show-tooltip');
+                    
+                    await Utils.delay(ANIMATION_TIMING.TOOLTIP_HIDE_DELAY);
+                    display.removeAttribute('data-tooltip');
+                    
+                } catch (error) {
+                    console.error('Ошибка копирования в буфер обмена:', error);
+                }
+            },
+
+            /**
+             * Устанавливает значение в поле ввода элемента
+             * @param {string} value
+             * @private
+             */
+            _setInputValue(value) {
+                DOMUtils.getElementById('itemInput').value = value;
+            },
+
+            /**
+             * Устанавливает значение разделителя для join
+             * @param {string} value
+             * @private
+             */
+            _setJoinValue(value) {
+                DOMUtils.getElementById('joinInput').value = value;
+            }
+        };
+
+        // ============================================================================
+        // ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
+        // ============================================================================
+
+        /**
+         * Главный объект приложения
+         */
+        const App = {
+            /**
+             * Инициализирует приложение
+             */
+            init() {
+                try {
+                    // Инициализируем обработчики событий
+                    EventHandlers.init();
+                    
+                    // Выполняем начальную отрисовку
+                    AppState.updateDisplay();
+                    AppState.updateSpliceInfo();
+                    
+                    console.log('JS Array Methods - приложение инициализировано');
+                } catch (error) {
+                    console.error('Ошибка инициализации приложения:', error);
+                }
+            }
+        };
+
+        // Запускаем приложение после загрузки DOM
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => App.init());
+        } else {
+            App.init();
+        }
+
     </script>
 </body>
 </html>
